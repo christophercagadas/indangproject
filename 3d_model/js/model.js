@@ -328,7 +328,7 @@ function buildHouse(scene){
     {a:3.35,b:3.95,bot:sillW3,top:topW3},          // T&B-a vent
     {a:4.65,b:5.25,bot:sillW3,top:topW3},          // T&B-b vent
     {a:6.35,b:7.65,bot:sillW4,top:topW4},          // Kitchen W-4 window (centered in 1500mm bay at x=7.00)
-    {a:10.15,b:12.25,bot:FFL,top:doorTop},         // D-1 sliding door (2.1x2.1)
+    {a:10.40,b:12.50,bot:FFL,top:doorTop},         // D-1 sliding door (2100x2100mm connecting Dining & Lanai)
   ]);
   // ---- West wall (grid 1) — B3 & B4 touch directly ----
   wallZ(W,-0.075,6.075,0,EXT_T,0,PARAPET,MAT.extWall,[
@@ -375,8 +375,8 @@ function buildHouse(scene){
   // South Lanai facade WF-01 stone-brick cladding between Grid 4 & Grid 5 (exterior face only, up to PARAPET=3.95m)
   box(W,4.45,PARAPET-2.50,0.14,MAT.stone,11.525,(PARAPET+2.50)/2,6.08);
   // Flanking WF-01 stone-brick piers on either side of D-1 sliding door (exterior face of South Lanai facade)
-  box(W,0.78,2.50,0.14,MAT.stone,9.72,1.25,6.09);                  // West stone pier (Grid 4)
-  box(W,1.15,2.50,0.14,MAT.stone,13.12,1.25,6.09);                 // East stone pier (Grid 5)
+  box(W,0.95,2.50,0.14,MAT.stone,9.82,1.25,6.09);                  // West stone pier (x=9.35..10.30)
+  box(W,1.05,2.50,0.14,MAT.stone,13.12,1.25,6.09);                 // East stone pier (x=12.60..13.65)
   // WF-03 cream surround frame around the Lanai / D-1 bay
   box(W,4.48,0.22,0.18,MAT.extCream,11.525,2.52,6.11);
 
@@ -463,13 +463,60 @@ function buildHouse(scene){
     for(let c=0;c<=3;c++) box(g,0.045,h,0.18,MAT.dark,13.85+c*(1.0/3),yc,5.0);
     O.add(g);
   })();
-  // D-1 sliding glass door 2.1x2.1 w/ 4x4 dark Analok grid (dining→lanai, per Door Schedule & Left Elev)
+  // D-1 Sliding Door (2100x2100mm connecting Dining & Lanai, per A-03 Schedule of Doors):
+  // 3/16mm thk. dark-tinted glass w/ Analok framing, 2 sliding panels (4x4 = 16 square panes w/ continuous white sash grid & <| |> center handles)
   (function(){
-    const g=grp('D1'); const w=2.1,h=2.1,x=11.20,z=6.0,yb=FFL,yc=FFL+h/2;
-    box(g,w+0.08,0.06,0.16,MAT.dark,x,FFL+h+0.03,z);
-    box(g,w,h,0.04,MAT.glass,x,yc,z);
-    for(let r=0;r<=4;r++) box(g,w+0.04,0.045,0.09,MAT.dark,x,yb+r*(h/4),z);
-    for(let c=0;c<=4;c++) box(g,0.045,h+0.04,0.09,MAT.dark,x-w/2+c*(w/4),yc,z);
+    const g=grp('D1');
+    const w=2.10, h=2.10, x=11.45, z=6.0, yb=FFL, yc=FFL+h/2;
+    const sashMat=new THREE.MeshStandardMaterial({color:0xf4f4f0,roughness:.32,metalness:.12});
+    const darkGlass=new THREE.MeshPhysicalMaterial({color:0x101419,transparent:true,opacity:.86,roughness:.10,metalness:.20});
+    // Outer Analok perimeter door jamb (2.10 x 2.10 m)
+    box(g,w+0.08,0.05,0.18,MAT.dark,x,yb+h+0.015,z);               // head jamb
+    box(g,w+0.08,0.04,0.18,MAT.dark,x,yb+0.02,z);                  // bottom track sill
+    box(g,0.05,h+0.04,0.18,MAT.dark,x-w/2-0.015,yc,z);             // left outer jamb
+    box(g,0.05,h+0.04,0.18,MAT.dark,x+w/2+0.015,yc,z);             // right outer jamb
+    // Inner white perimeter frame (matching Schedule of Doors D-1 diagram)
+    box(g,w+0.02,0.035,0.16,sashMat,x,yb+h-0.01,z);
+    box(g,w+0.02,0.035,0.16,sashMat,x,yb+0.035,z);
+    box(g,0.035,h,0.16,sashMat,x-w/2+0.01,yc,z);
+    box(g,0.035,h,0.16,sashMat,x+w/2-0.01,yc,z);
+    // Two 2x4-grid sliding leaves (Left leaf at z-0.018, Right leaf at z+0.018 on 2-track rail)
+    const leafW=w/2, innerH=h-0.06, cellW=leafW/2, cellH=innerH/4;
+    for(let s=0;s<2;s++){
+      const lx0 = (s===0) ? (x-w/2) : x;
+      const lxc = lx0 + leafW/2;
+      const lz  = (s===0) ? (z-0.018) : (z+0.018);
+      // Continuous vertical stiles (left, center muntion, right) — no gaps between panes
+      for(let c=0;c<=2;c++){
+        const sx = lx0 + c*cellW + (c===0?0.022:(c===2?-0.022:0));
+        const sw = (c===1) ? 0.042 : 0.045;
+        box(g,sw,innerH,0.042,sashMat,sx,yc,lz);
+      }
+      // Continuous horizontal rails (5 rails for 4 rows) — no gaps between panes
+      for(let r=0;r<=4;r++){
+        const ry = yb + 0.03 + r*cellH;
+        const rh = (r===0||r===4) ? 0.045 : 0.042;
+        box(g,leafW,rh,0.042,sashMat,lxc,ry,lz);
+      }
+      // Center vertical black meeting line between the two sliding leaves
+      box(g,0.022,innerH+0.02,0.052,MAT.dark,x,yc,z);
+      // 2 cols x 4 rows = 8 dark square glass panes per leaf (4x4 = 16 squares total)
+      for(let r=0;r<4;r++){
+        const py = yb + 0.03 + (r+0.5)*cellH;
+        for(let c=0;c<2;c++){
+          const px = lx0 + (c+0.5)*cellW;
+          box(g,cellW-0.048,cellH-0.048,0.028,darkGlass,px,py,lz);
+        }
+      }
+      // Center "<|" and "|>" sliding handles on the middle rail (matching Schedule of Doors D-1)
+      const dir = (s===0) ? -1 : 1;
+      const hx = x + dir*0.11, hy = yb + 0.03 + 2*cellH;
+      box(g,0.018,0.11,0.065,MAT.dark,hx-dir*0.035,hy,lz);         // vertical handle bar
+      // triangular arrow head pointing left (<|) on left leaf and right (|>) on right leaf
+      box(g,0.075,0.018,0.062,MAT.dark,hx+dir*0.01,hy+0.026,lz);
+      box(g,0.075,0.018,0.062,MAT.dark,hx+dir*0.01,hy-0.026,lz);
+      box(g,0.018,0.065,0.062,MAT.dark,hx-dir*0.025,hy,lz);
+    }
     O.add(g);
   })();
   // D-2 Main Entrance Door (z=3.80..4.70 on x=15.0): vertical fluted light-oak door w/ black bar handle per PERSPECTIVE-01
@@ -707,6 +754,7 @@ function buildHouse(scene){
   label(Lb,'DINING',11.5,CEIL+0.4,4.9);
   label(Lb,'HALLWAY',3.7,CEIL+0.4,3.3);
   label(Lb,'LANAI',11.0,CEIL+0.4,7.1);
+  label(Lb,'D-1',11.45,CEIL+0.4,6.0);
   label(Lb,'CARPORT',15.8,CEIL+0.4,6.5);
 
   for(const k in L){ scene.add(L[k]); }
