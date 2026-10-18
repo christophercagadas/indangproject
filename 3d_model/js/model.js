@@ -327,7 +327,7 @@ function buildHouse(scene){
     {a:0.90,b:2.30,bot:sillW2,top:topW2},          // B4 window
     {a:3.35,b:3.95,bot:sillW3,top:topW3},          // T&B-a vent
     {a:4.65,b:5.25,bot:sillW3,top:topW3},          // T&B-b vent
-    {a:6.90,b:8.20,bot:sillW4,top:topW4},          // Kitchen window
+    {a:6.35,b:7.65,bot:sillW4,top:topW4},          // Kitchen W-4 window (centered in 1500mm bay at x=7.00)
     {a:10.15,b:12.25,bot:FFL,top:doorTop},         // D-1 sliding door (2.1x2.1)
   ]);
   // ---- West wall (grid 1) — B3 & B4 touch directly ----
@@ -372,13 +372,13 @@ function buildHouse(scene){
   // 3. WF-01 Stone-Brick Feature Tower & South Lanai Cladding (per PERSPECTIVE-01 & A-03)
   // Full-height stone-brick tower at Grid 5 / Grid C corner rising to APEX = 4.55 m
   box(W,1.38,APEX,0.75,MAT.stone,14.34,APEX/2,4.82);               // Iconic vertical stone tower (y=0..4.55)
-  // South Lanai facade WF-01 stone-brick cladding between Grid 4 & Grid 5 (x=9.30..13.75, up to PARAPET=3.95m)
-  box(W,4.45,PARAPET-2.50,0.28,MAT.stone,11.525,(PARAPET+2.50)/2,6.02);
-  // Flanking WF-01 stone-brick piers on either side of D-1 sliding door (South Lanai facade)
-  box(W,0.78,2.50,0.28,MAT.stone,9.72,1.25,6.04);                  // West stone pier (Grid 4)
-  box(W,1.15,2.50,0.28,MAT.stone,13.12,1.25,6.04);                 // East stone pier (Grid 5)
+  // South Lanai facade WF-01 stone-brick cladding between Grid 4 & Grid 5 (exterior face only, up to PARAPET=3.95m)
+  box(W,4.45,PARAPET-2.50,0.14,MAT.stone,11.525,(PARAPET+2.50)/2,6.08);
+  // Flanking WF-01 stone-brick piers on either side of D-1 sliding door (exterior face of South Lanai facade)
+  box(W,0.78,2.50,0.14,MAT.stone,9.72,1.25,6.09);                  // West stone pier (Grid 4)
+  box(W,1.15,2.50,0.14,MAT.stone,13.12,1.25,6.09);                 // East stone pier (Grid 5)
   // WF-03 cream surround frame around the Lanai / D-1 bay
-  box(W,4.48,0.22,0.32,MAT.extCream,11.525,2.52,6.06);
+  box(W,4.48,0.22,0.18,MAT.extCream,11.525,2.52,6.11);
 
   /* ================= INTERIOR WALLS ================= */
   const I=L.intwalls;
@@ -436,7 +436,7 @@ function buildHouse(scene){
   windowUnit(O,1.60,6.0,true,1.40,sillW2,1.00);    // B4 S
   windowUnit(O,3.65,6.0,true,0.60,sillW3,0.60);    // T&B-a
   windowUnit(O,4.95,6.0,true,0.60,sillW3,0.60);    // T&B-b
-  windowUnit(O,7.55,6.0,true,1.30,sillW4,0.60);    // Kitchen W-4
+  windowUnit(O,7.00,6.0,true,1.30,sillW4,0.60);    // Kitchen W-4 (centered at x=7.00 over sink)
   windowUnit(O,0,1.50,false,1.40,sillW2,1.00);     // B3 W
   windowUnit(O,0,4.50,false,1.40,sillW2,1.00);     // B4 W
   // Front 4x4 dark-grid window wall on East facade (z=0.35..2.85, per PERSPECTIVE-01 & Front Elev)
@@ -546,36 +546,51 @@ function buildHouse(scene){
   /* ================= KITCHEN & T&B FIXTURES ================= */
   const F=L.fixtures;
   const kTop=FFL+0.85;
-  // kitchen (per A-04 blow-up + isometric): U-galley —
-  // west run + south sink run + stove peninsula, breakfast bar on hallway edge
-  const bTop=FFL+1.05;
-  box(F,0.62,0.85,1.05,MAT.cabOak,5.98,FFL+0.425,5.08);         // west leg base
-  box(F,0.66,0.05,1.09,MAT.marble,5.98,kTop+0.025,5.08);        // west leg top
-  box(F,2.3,0.85,0.62,MAT.cabOak,6.85,FFL+0.425,5.62);          // south counter (sink run)
-  box(F,2.36,0.05,0.66,MAT.marble,6.85,kTop+0.025,5.62);        // marble top
-  box(F,0.7,0.04,0.45,MAT.applWhite,6.35,kTop+0.05,5.6);        // sink rim
-  cyl(F,0.02,0.02,0.3,MAT.steel,6.35,kTop+0.18,5.85);           // faucet
-  // stove peninsula on the east edge (N-S unit to south wall): cook counter
-  // on the kitchen side + raised counter table on the dining side (red box)
-  box(F,0.6,0.85,1.7,MAT.cabOak,7.0,FFL+0.425,5.12);            // cook counter base
-  box(F,0.66,0.05,1.77,MAT.marble,7.0,kTop+0.03,5.12);          // counter top
-  box(F,0.55,1.05,1.7,MAT.cabOak,7.6,FFL+0.525,5.12);           // counter table (bar ht)
-  box(F,0.62,0.05,1.77,MAT.marble,7.6,bTop+0.03,5.12);          // counter table top
-  box(F,0.05,0.9,1.7,MAT.flutedOak,7.9,FFL+0.5,5.12);           // fluted front to dining
-  box(F,0.55,0.03,0.5,MAT.dark,7.0,kTop+0.06,4.75);             // cooktop
-  for(const [sx,sz] of [[6.85,4.62],[7.15,4.62],[6.85,4.9],[7.15,4.9]])
+  // Kitchen (9.64 sqm per A-02 Floor Plan & A-04 Kitchen Blow-Up / Isometric):
+  // Exact A-02/A-04 width chain from T&B wall (x=5.60) to east bar face (x=8.75) = 3150 mm:
+  //   650 mm west leg & fridge (x=5.60..6.25)
+  // + 1500 mm clear center floor & south sink counter (x=6.25..7.75)
+  // + 600 mm east stove peninsula (x=7.75..8.35, z=4.35..5.95, length 1600 mm)
+  // + 400 mm raised counter table / bar w/ fluted oak front (x=8.35..8.75, z=4.35..5.95)
+  const bTop=FFL+1.00;                                            // 850 + 150 = 1000 mm bar height per A-04 Elev A/B
+  // 1. West leg base counter (x=5.65..6.25, z=4.82..5.40) + Fridge at NW (x=5.65..6.28, z=4.10..4.80)
+  box(F,0.60,0.85,0.58,MAT.cabOak,5.95,FFL+0.425,5.11);           // west leg base (500mm+corner per A-04)
+  box(F,0.64,0.05,0.62,MAT.marble,5.95,kTop+0.025,5.11);          // west leg white marble top
+  box(F,0.64,1.80,0.70,MAT.applWhite,5.97,FFL+0.90,4.45);         // 1800mm refrigerator (700mm wide per A-04)
+  box(F,0.60,0.30,0.70,MAT.cabGrey,5.95,FFL+1.95,4.45);           // 300mm bridge cabinet over fridge per A-04
+  // 2. South sink counter run spanning west corner + 1500mm center bay (x=5.65..7.75, z=5.35..5.95)
+  box(F,2.10,0.85,0.60,MAT.cabOak,6.70,FFL+0.425,5.65);           // south oak base cabinet
+  box(F,2.14,0.05,0.64,MAT.marble,6.70,kTop+0.025,5.65);          // south white marble slab
+  // Double-bowl sink centered in the 1500mm center bay (x=7.00) under W-4 window per A-04
+  box(F,0.82,0.04,0.46,MAT.steel,7.00,kTop+0.05,5.65);            // double sink rim
+  box(F,0.35,0.03,0.36,MAT.dark,6.80,kTop+0.055,5.65);            // left sink bowl
+  box(F,0.35,0.03,0.36,MAT.dark,7.20,kTop+0.055,5.65);            // right sink bowl
+  cyl(F,0.02,0.02,0.28,MAT.steel,7.00,kTop+0.18,5.84);            // faucet stem
+  // 3. East stove peninsula (600mm wide: x=7.75..8.35, 1600mm long: z=4.35..5.95)
+  box(F,0.60,0.85,1.60,MAT.cabOak,8.05,FFL+0.425,5.15);           // stove counter base (600x1600)
+  box(F,0.64,0.05,1.64,MAT.marble,8.05,kTop+0.025,5.15);          // stove counter marble top
+  box(F,0.52,0.03,0.52,MAT.dark,8.05,kTop+0.06,4.90);             // 4-burner cooktop
+  for(const [sx,sz] of [[7.92,4.76],[8.18,4.76],[7.92,5.04],[8.18,5.04]])
     cyl(F,0.055,0.055,0.01,MAT.applWhite,sx,kTop+0.075,sz);
-  box(F,0.6,0.05,0.4,MAT.steel,7.0,CEIL-0.9,4.75);              // range hood
-  box(F,0.08,0.55,0.08,MAT.steel,7.0,CEIL-0.6,4.75);
-  // overhead cabinets (gloss grey): south wall + west wrap
-  box(F,2.6,0.75,0.35,MAT.cabGrey,7.0,FFL+1.9,5.78);
-  box(F,0.35,0.75,1.2,MAT.cabGrey,5.85,FFL+1.9,5.15);
-  // fridge / tall unit at kitchen NW corner (next to T&B wall, per plan)
-  box(F,0.75,1.8,0.7,MAT.applWhite,5.98,FFL+0.9,4.15);
-  // stools on the dining side of the counter table
-  for(const sz of [4.6,5.15]){
-    cyl(F,0.02,0.02,0.72,MAT.steel,8.12,FFL+0.36,sz);
-    cyl(F,0.19,0.16,0.06,MAT.cabGrey,8.12,FFL+0.75,sz);
+  box(F,0.60,0.06,0.45,MAT.steel,8.05,CEIL-0.85,4.90);            // range hood
+  box(F,0.10,0.55,0.10,MAT.steel,8.05,CEIL-0.55,4.90);
+  // 4. East raised Counter Table / Breakfast Bar (400mm wide: x=8.35..8.75, 1600mm long: z=4.35..5.95)
+  box(F,0.40,1.00,1.60,MAT.dark,8.55,FFL+0.50,5.15);              // raised bar frame (400x1600, h=1000mm)
+  box(F,0.44,0.05,1.64,MAT.dark,8.55,bTop+0.025,5.15);            // bar top slab
+  box(F,0.04,0.96,1.56,MAT.flutedOak,8.76,FFL+0.48,5.15);         // WPC fluted oak panel facing dining
+  // Overhead gloss-grey cabinets (650mm high) along south & west walls per A-04 Isometric
+  box(F,2.10,0.65,0.35,MAT.cabGrey,6.70,FFL+1.78,5.78);           // south overhead cabinet
+  box(F,0.35,0.65,0.65,MAT.cabGrey,5.82,FFL+1.78,5.12);           // west overhead cabinet
+  // Suspended bar drop-soffit & 2 pendant lights above Counter Table per A-04 Isometric & Elev A/B
+  box(F,0.42,0.12,1.60,MAT.cabOak,8.55,CEIL-0.45,5.15);           // suspended bar ceiling feature
+  for(const pz of [4.75,5.45]){
+    cyl(F,0.01,0.01,0.45,MAT.dark,8.55,CEIL-0.70,pz);             // pendant cord
+    cyl(F,0.05,0.07,0.16,MAT.lightDisc,8.55,CEIL-0.95,pz);        // pendant lamp
+  }
+  // Bar stools on the dining side of the Counter Table (x=9.02, well clear of dining table at x=10.6..12.4)
+  for(const sz of [4.75,5.45]){
+    cyl(F,0.025,0.025,0.68,MAT.dark,9.02,FFL+0.34,sz);
+    cyl(F,0.19,0.16,0.06,MAT.cabOak,9.02,FFL+0.70,sz);
   }
   // T&B-a (west): WC + lavatory
   cyl(F,0.22,0.28,0.42,MAT.porcelain,3.75,FFL+0.21,4.65);
@@ -688,7 +703,7 @@ function buildHouse(scene){
   label(Lb,'GENKAN',14.3,CEIL+0.4,4.0);
   label(Lb,'BEDROOM 4',1.4,CEIL+0.4,4.7);
   label(Lb,'T&B',4.3,CEIL+0.4,5.0);
-  label(Lb,'KITCHEN',8.2,CEIL+0.4,4.4);
+  label(Lb,'KITCHEN',7.0,CEIL+0.4,4.7);
   label(Lb,'DINING',11.5,CEIL+0.4,4.9);
   label(Lb,'HALLWAY',3.7,CEIL+0.4,3.3);
   label(Lb,'LANAI',11.0,CEIL+0.4,7.1);
