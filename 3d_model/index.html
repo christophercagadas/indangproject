@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Indang Residence — 3D Blueprint Model</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;font-family:Segoe UI,Arial,sans-serif;background:#1a1d22}
+  #scene{position:fixed;inset:0}
+  #panel{position:fixed;top:0;left:0;width:230px;max-height:100%;overflow-y:auto;background:rgba(20,22,26,.92);
+         color:#dfe3ea;padding:14px;border-right:1px solid #333;box-sizing:border-box;user-select:none}
+  #panel h1{font-size:14px;margin:0 0 2px;color:#fff}
+  #panel .sub{font-size:11px;color:#8b95a3;margin-bottom:12px}
+  .grp{margin-bottom:12px}
+  .grp .t{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#7d8896;margin-bottom:5px}
+  .btn{display:block;width:100%;margin:3px 0;padding:7px 9px;background:#2a2f38;border:1px solid #3a4150;
+       color:#dfe3ea;border-radius:5px;font-size:12px;text-align:left;cursor:pointer}
+  .btn:hover{background:#343b47}
+  .btn.active{background:#2f5f8f;border-color:#4a8cc8;color:#fff}
+  label.ck{display:flex;align-items:center;gap:7px;font-size:12px;padding:3px 2px;cursor:pointer}
+  label.ck input{accent-color:#4a8cc8}
+  #hint{position:fixed;bottom:10px;left:250px;color:#aab3bf;font-size:11px;background:rgba(20,22,26,.7);
+        padding:6px 10px;border-radius:5px}
+  #info{position:fixed;top:10px;right:10px;width:270px;background:rgba(20,22,26,.9);color:#cfd6df;
+        font-size:11px;padding:10px 12px;border-radius:6px;border:1px solid #333;display:none;line-height:1.5}
+  #info b{color:#fff}
+  @media (max-width:720px){#panel{width:190px}}
+</style>
+</head>
+<body>
+<div id="scene"></div>
+
+<div id="panel">
+  <h1>Indang Residence</h1>
+  <div class="sub">One-storey house · 97.06 sqm · from plan set A-01–A-04 / S-01–S-02</div>
+
+  <div class="grp">
+    <div class="t">View modes</div>
+    <button class="btn active" data-view="exterior">Exterior</button>
+    <button class="btn" data-view="interior">Interior (roof off)</button>
+    <button class="btn" data-view="ceiling">Ceiling view (inside)</button>
+    <button class="btn" data-view="roof">Roof only</button>
+    <button class="btn" data-view="structure">Structure / framing</button>
+    <button class="btn" data-view="plan">Top plan</button>
+    <button class="btn" data-view="walk">Walkthrough (WASD + mouse)</button>
+  </div>
+
+  <div class="grp">
+    <div class="t">Layers</div>
+    <label class="ck"><input type="checkbox" data-layer="roof" checked> Roof &amp; parapet</label>
+    <label class="ck"><input type="checkbox" data-layer="porchroof" checked> Lanai / carport roof</label>
+    <label class="ck"><input type="checkbox" data-layer="ceiling" checked> Ceilings</label>
+    <label class="ck"><input type="checkbox" data-layer="extwalls" checked> Exterior walls</label>
+    <label class="ck"><input type="checkbox" data-layer="intwalls" checked> Interior walls</label>
+    <label class="ck"><input type="checkbox" data-layer="openings" checked> Doors &amp; windows</label>
+    <label class="ck"><input type="checkbox" data-layer="fixtures" checked> Kitchen / bath fixtures</label>
+    <label class="ck"><input type="checkbox" data-layer="furniture" checked> Furniture (est.)</label>
+    <label class="ck"><input type="checkbox" data-layer="structure"> Structure</label>
+    <label class="ck"><input type="checkbox" data-layer="lights" checked> Ceiling lights</label>
+    <label class="ck"><input type="checkbox" data-layer="labels"> Room labels</label>
+    <label class="ck"><input type="checkbox" data-layer="site" checked> Site / ground</label>
+  </div>
+
+  <div class="grp">
+    <div class="t">Quick cameras</div>
+    <button class="btn" data-cam="front">Entrance (E)</button>
+    <button class="btn" data-cam="back">Rear (W)</button>
+    <button class="btn" data-cam="south">Lanai side (S)</button>
+    <button class="btn" data-cam="living">Inside living</button>
+    <button class="btn" data-cam="dining">Inside dining</button>
+    <button class="btn" data-cam="bed1">Inside bedroom 1</button>
+  </div>
+  <div class="grp">
+    <div class="t">Notes</div>
+    <div style="font-size:11px;color:#9aa4b0;line-height:1.45">
+      FFL = +0.35 m above grade. Interior ceiling 2.55 m. Furniture is illustrative — walls,
+      openings, heights follow the plan set. See README.md for assumptions.
+    </div>
+  </div>
+</div>
+
+<div id="hint">Left-drag orbit · wheel zoom · right-drag pan</div>
+<div id="info"></div>
+
+<script src="js/three.min.js"></script>
+<script src="js/OrbitControls.js"></script>
+<script src="js/model.js"></script>
+<script>
+// ---------- renderer / scene / camera ----------
+const container = document.getElementById('scene');
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputEncoding = THREE.sRGBEncoding;
+container.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x9db8d6);
+scene.fog = new THREE.Fog(0x9db8d6, 60, 160);
+
+const camera = new THREE.PerspectiveCamera(42, innerWidth/innerHeight, 0.05, 500);
+camera.position.set(27.5, 2.2, 4.0);
+
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.target.set(13.5, 2.0, 4.0);
+controls.maxPolarAngle = Math.PI/2 - 0.02;
+controls.enableDamping = true;
+
+// ---------- lights ----------
+scene.add(new THREE.HemisphereLight(0xcfe2f7, 0x8a7f6a, 0.80));
+const sun = new THREE.DirectionalLight(0xfff5e4, 1.35);
+sun.position.set(26, 28, 18);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048,2048);
+sun.shadow.camera.left=-30; sun.shadow.camera.right=30;
+sun.shadow.camera.top=30; sun.shadow.camera.bottom=-30;
+sun.shadow.camera.far=120; sun.shadow.bias=-0.0004;
+scene.add(sun);
+const fill = new THREE.DirectionalLight(0xdde8ff, 0.25);
+fill.position.set(-20,15,25); scene.add(fill);
+
+// ---------- build model ----------
+const model = buildHouse(scene);   // returns {layers:{...}}
+
+// ---------- view modes ----------
+const VIEWS = {
+  exterior(){ setVis({roof:1,porchroof:1,ceiling:1,extwalls:1,intwalls:1,openings:1,fixtures:1,furniture:0,structure:0,lights:1,labels:0,site:1});
+    flyTo([27.5,2.2,4.0],[13.5,2.0,4.0]); },
+  interior(){ setVis({roof:0,porchroof:1,ceiling:0,extwalls:1,intwalls:1,openings:1,fixtures:1,furniture:1,structure:0,lights:0,labels:1,site:1});
+    flyTo([11.6,2.6,7.8],[11.8,1.0,2.2]); },
+  ceiling(){ setVis({roof:0,porchroof:0,ceiling:1,extwalls:1,intwalls:1,openings:1,fixtures:0,furniture:0,structure:0,lights:1,labels:1,site:0});
+    flyTo([11.5,1.1,4.2],[11.5,2.8,3.4]); },
+  roof(){ setVis({roof:1,porchroof:1,ceiling:0,extwalls:0,intwalls:0,openings:0,fixtures:0,furniture:0,structure:0,lights:0,labels:0,site:1});
+    flyTo([20,16,18],[9,3.4,3.5]); },
+  structure(){ setVis({roof:0,porchroof:0,ceiling:0,extwalls:1,intwalls:1,openings:0,fixtures:0,furniture:0,structure:1,lights:0,labels:0,site:1});
+    flyTo([18,10,16],[8,2.2,3.5]); },
+  plan(){ setVis({roof:0,porchroof:0,ceiling:0,extwalls:1,intwalls:1,openings:1,fixtures:1,furniture:1,structure:0,lights:0,labels:1,site:1});
+    flyTo([8.5,32,4.0],[8.5,0,3.9]); }
+};
+function setVis(v){
+  for(const k in v){ if(model.layers[k]) model.layers[k].visible = !!v[k];
+    const cb=document.querySelector(`input[data-layer="${k}"]`); if(cb) cb.checked=!!v[k]; }
+}
+let camGoal=null;
+function flyTo(pos,tgt){ camGoal={pos:new THREE.Vector3(...pos),tgt:new THREE.Vector3(...tgt)}; }
+
+document.querySelectorAll('.btn[data-view]').forEach(b=>{
+  b.onclick=()=>{ document.querySelectorAll('.btn[data-view]').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active'); walkMode=false; controls.enabled=true;
+    if(b.dataset.view==='walk'){ walkMode=true; controls.enabled=false; enterWalk(); return; }
+    VIEWS[b.dataset.view](); };
+});
+document.querySelectorAll('input[data-layer]').forEach(cb=>{
+  cb.onchange=()=>{ model.layers[cb.dataset.layer].visible = cb.checked; };
+});
+document.querySelectorAll('.btn[data-cam]').forEach(b=>{
+  b.onclick=()=>{
+    const cams={
+      front:[[27.5,2.2,4.0],[13.5,2.0,4.0]], back:[[-8,5,5],[8,1.8,3]],
+      south:[[13.5,3.2,16.5],[12.5,1.8,5.5]], living:[[12.4,1.7,4.6],[11.2,1.3,1.2]],
+      dining:[[9.6,1.7,2.6],[11.6,1.2,5.2]], bed1:[[7.6,1.7,1.4],[7.0,1.0,0.6]]
+    };
+    const c=cams[b.dataset.cam]; if(c) flyTo(c[0],c[1]);
+  };
+});
+
+// ---------- walk mode ----------
+let walkMode=false, walkYaw=Math.PI*0.85, walkPitch=-0.05, walkPos=new THREE.Vector3(11.5,1.95,4.0);
+const keys={};
+addEventListener('keydown',e=>keys[e.code]=true);
+addEventListener('keyup',e=>keys[e.code]=false);
+let dragging=false,px=0,py=0;
+renderer.domElement.addEventListener('pointerdown',e=>{if(walkMode){dragging=true;px=e.clientX;py=e.clientY;}});
+addEventListener('pointerup',()=>dragging=false);
+addEventListener('pointermove',e=>{
+  if(walkMode&&dragging){ walkYaw-=(e.clientX-px)*0.004; walkPitch-=(e.clientY-py)*0.004;
+    walkPitch=Math.max(-1.2,Math.min(1.2,walkPitch)); px=e.clientX;py=e.clientY; }
+});
+function enterWalk(){ walkPos.set(11.5,1.95,4.0); document.getElementById('hint').textContent='Walk: WASD move · drag to look · Esc buttons to exit'; }
+function walkStep(dt){
+  const s=(keys.ShiftLeft?4.5:2.0)*dt;
+  const f=new THREE.Vector3(-Math.sin(walkYaw),0,-Math.cos(walkYaw));
+  const r=new THREE.Vector3(-f.z,0,f.x);
+  if(keys.KeyW)walkPos.addScaledVector(f,s); if(keys.KeyS)walkPos.addScaledVector(f,-s);
+  if(keys.KeyA)walkPos.addScaledVector(r,-s); if(keys.KeyD)walkPos.addScaledVector(r,s);
+  walkPos.x=Math.max(-2,Math.min(19,walkPos.x)); walkPos.z=Math.max(-2,Math.min(9,walkPos.z));
+  camera.position.copy(walkPos);
+  camera.lookAt(walkPos.x-Math.sin(walkYaw)*Math.cos(walkPitch), walkPos.y+Math.sin(walkPitch),
+                walkPos.z-Math.cos(walkYaw)*Math.cos(walkPitch));
+}
+
+// ---------- URL param: ?view=xxx&cam=xxx ----------
+const qp=new URLSearchParams(location.search);
+if(qp.get('cam')){ const b=document.querySelector(`.btn[data-cam="${qp.get('cam')}"]`); if(b)b.onclick(); }
+if(qp.get('view')){ const b=document.querySelector(`.btn[data-view="${qp.get('view')}"]`); if(b)b.onclick(); }
+if(qp.get('campos')){ const p=qp.get('campos').split(',').map(Number); camera.position.set(p[0],p[1],p[2]); }
+if(qp.get('tgt')){ const p=qp.get('tgt').split(',').map(Number); controls.target.set(p[0],p[1],p[2]); camGoal=null; }
+
+// ---------- loop ----------
+const clock=new THREE.Clock();
+function tick(){
+  requestAnimationFrame(tick);
+  const dt=Math.min(clock.getDelta(),0.05);
+  if(walkMode){ walkStep(dt); }
+  else{
+    if(camGoal){ camera.position.lerp(camGoal.pos,0.12); controls.target.lerp(camGoal.tgt,0.12);
+      if(camera.position.distanceTo(camGoal.pos)<0.05) camGoal=null; }
+    controls.update();
+  }
+  renderer.render(scene,camera);
+}
+tick();
+addEventListener('resize',()=>{ camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
+</script>
+</body>
+</html>
