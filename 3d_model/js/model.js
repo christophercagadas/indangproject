@@ -196,22 +196,24 @@ function windowUnit(parent,x,z,alongX,w,sillAbs,h){
   }
   parent.add(g); return g;
 }
-function doorUnit(parent,x,z,alongX,w,h,mat,botAbs,leafAngle=0.6){
+function doorUnit(parent,x,z,alongX,w,h,mat,botAbs,leafAngle=0.6,hingeEnd=false){
   const fT=0.05, g=grp('door');
   if(alongX){
     box(g,w+0.08,fT,0.14,MAT.frame,x,botAbs+h+fT/2,z);
     box(g,fT,h,0.14,MAT.frame,x-w/2,botAbs+h/2,z);
     box(g,fT,h,0.14,MAT.frame,x+w/2,botAbs+h/2,z);
     const leaf=box(g,w-0.04,h-0.02,0.04,mat,0,botAbs+h/2,0);
-    leaf.position.set(x-w/2+ (w-0.04)/2*Math.cos(leafAngle), botAbs+h/2, z+(w-0.04)/2*Math.sin(leafAngle));
-    leaf.rotation.y=-leafAngle;
+    const dir=hingeEnd?-1:1, hx=hingeEnd?(x+w/2):(x-w/2);
+    leaf.position.set(hx+dir*(w-0.04)/2*Math.cos(leafAngle), botAbs+h/2, z+(w-0.04)/2*Math.sin(leafAngle));
+    leaf.rotation.y=-dir*leafAngle;
   } else {
     box(g,0.14,fT,w+0.08,MAT.frame,x,botAbs+h+fT/2,z);
     box(g,0.14,h,fT,MAT.frame,x,botAbs+h/2,z-w/2);
     box(g,0.14,h,fT,MAT.frame,x,botAbs+h/2,z+w/2);
     const leaf=box(g,0.04,h-0.02,w-0.04,mat,0,botAbs+h/2,0);
-    leaf.position.set(x+(w-0.04)/2*Math.sin(leafAngle), botAbs+h/2, z-w/2+(w-0.04)/2*Math.cos(leafAngle));
-    leaf.rotation.y=leafAngle;
+    const dir=hingeEnd?-1:1, hz=hingeEnd?(z+w/2):(z-w/2);
+    leaf.position.set(x+(w-0.04)/2*Math.sin(leafAngle), botAbs+h/2, hz+dir*(w-0.04)/2*Math.cos(leafAngle));
+    leaf.rotation.y=dir*leafAngle;
   }
   parent.add(g); return g;
 }
@@ -286,17 +288,17 @@ function buildHouse(scene){
   // interior rooms (FF-01 wood tile): B3+B4 occupy full 6m depth on west;
   // B2 has an L-shape around the central hallway pocket; B1 reaches z=3.25
   floorSlab(fl,0,0,3.0,6.0,FFL,0.12,MAT.floorWood);          // B3 + B4 (touching, no west hallway)
-  floorSlab(fl,3.0,0,6.1,2.25,FFL,0.12,MAT.floorWood);       // B2 north body
-  floorSlab(fl,4.15,2.25,6.45,3.25,FFL,0.12,MAT.floorWood);  // B2 SE wing
-  floorSlab(fl,6.1,0,9.35,3.25,FFL,0.12,MAT.floorWood);      // B1 (depth 3.25)
+  floorSlab(fl,3.0,0,6.1,2.15,FFL,0.12,MAT.floorWood);       // B2 north body
+  floorSlab(fl,4.15,2.15,6.45,3.15,FFL,0.12,MAT.floorWood);  // B2 SE wing
+  floorSlab(fl,6.1,0,9.35,3.15,FFL,0.12,MAT.floorWood);      // B1 (depth 3.15)
   floorSlab(fl,9.35,0,15.0,2.95,FFL,0.12,MAT.floorWood);     // Living (incl. NE alcove to x=15.0)
   floorSlab(fl,13.67,2.95,15.0,5.0,GENKAN_FL,0.12,MAT.floorWood); // Genkan (+0.20, z=2.95..5.0 per A-02)
   // wet / service (FF-02 white tile includes the central hallway pocket; FF-03 in T&B)
-  floorSlab(fl,3.0,2.25,4.15,4.05,FFL,0.12,MAT.floorWhite);  // Hallway pocket (2.60 sqm)
-  floorSlab(fl,4.15,3.25,5.6,4.05,FFL,0.12,MAT.floorWhite);  // Hallway strip in front of T&B
+  floorSlab(fl,3.0,2.15,4.15,4.05,FFL,0.12,MAT.floorWhite);  // Hallway pocket (between B3 & B2)
+  floorSlab(fl,4.15,3.15,5.6,4.05,FFL,0.12,MAT.floorWhite);  // Hallway strip in front of T&B
   floorSlab(fl,3.0,4.05,4.3,6.0,FFL,0.12,MAT.floorNS);       // T&B-a
   floorSlab(fl,4.3,4.05,5.6,6.0,FFL,0.12,MAT.floorNS);       // T&B-b
-  floorSlab(fl,5.6,3.25,9.1,6.0,FFL,0.12,MAT.floorWhite);    // Kitchen (open plan)
+  floorSlab(fl,5.6,3.15,9.1,6.0,FFL,0.12,MAT.floorWhite);    // Kitchen (open plan)
   floorSlab(fl,9.1,2.95,13.67,6.0,FFL,0.12,MAT.floorWhite);  // Dining (ends at grid 5 x=13.67)
   // outdoor
   floorSlab(fl,8.95,6.0,12.97,8.0,LANAI_FL,0.12,MAT.floorWood); // Lanai deck (+0.30, 4.02x2.0m)
@@ -381,32 +383,35 @@ function buildHouse(scene){
   /* ================= INTERIOR WALLS ================= */
   const I=L.intwalls;
   const iTop=CEIL, iBot=FFL;
-  // B3 | B4 stepped partition (rooms touch directly — no hallway on west)
-  wallX(I,0,1.05,2.75,INT_T,iBot,iTop,MAT.intWall);
-  wallZ(I,2.75,3.25,1.05,INT_T,iBot,iTop,MAT.intWall);
-  wallX(I,1.05,1.95,3.25,INT_T,iBot,iTop,MAT.intWall);
-  wallZ(I,2.75,3.25,1.95,INT_T,iBot,iTop,MAT.intWall);
-  wallX(I,1.95,3.0,2.75,INT_T,iBot,iTop,MAT.intWall);
-  // x=3.0 wall (B3+B4 | B2+Hallway+T&B) with B3 & B4 D-4 doors into hallway pocket
+  // B3 | B4 stepped partition along Grid B (z=3.15, stepping south to z=3.50 at x=1.05..1.95 per A-02)
+  wallX(I,0,1.05,3.15,INT_T,iBot,iTop,MAT.intWall);
+  wallZ(I,3.15,3.50,1.05,INT_T,iBot,iTop,MAT.intWall);
+  wallX(I,1.05,1.95,3.50,INT_T,iBot,iTop,MAT.intWall);
+  wallZ(I,3.15,3.50,1.95,INT_T,iBot,iTop,MAT.intWall);
+  wallX(I,1.95,3.0,3.15,INT_T,iBot,iTop,MAT.intWall);
+  // x=3.0 wall (B3+B4 | B2+Hallway+T&B):
+  // - z=0..2.15 separates B3 from B2
+  // - z=2.15..3.15 faces the hallway pocket and holds B3's D-4 door (z=2.23..3.03)
+  // - z=3.15..4.05 faces the hallway and holds B4's D-4 door (z=3.20..4.00)
   wallZ(I,0,6.0,3.0,INT_T,iBot,iTop,MAT.intWall,[
-    {a:1.85,b:2.65,bot:iBot,top:doorTop},          // B3 D-4 (opens W into B3)
-    {a:3.10,b:3.90,bot:iBot,top:doorTop},          // B4 D-4 (opens W into B4)
+    {a:2.23,b:3.03,bot:iBot,top:doorTop},          // B3 D-4 (in hallway pocket z=2.15..3.15, opens W into B3)
+    {a:3.20,b:4.00,bot:iBot,top:doorTop},          // B4 D-4 (south of z=3.15 partition, opens W into B4)
   ]);
-  // B2 L-recess around hallway pocket: N wall of pocket (z=2.25) + E wall w/ B2 D-4 (x=4.15)
-  wallX(I,3.0,4.15,2.25,INT_T,iBot,iTop,MAT.intWall);
-  wallZ(I,2.25,3.25,4.15,INT_T,iBot,iTop,MAT.intWall,[
-    {a:2.35,b:3.15,bot:iBot,top:doorTop},          // B2 D-4 (opens E into B2)
+  // B2 L-recess around hallway pocket: N wall of pocket (z=2.15, x=3.0..4.15) + E wall w/ B2 D-4 (x=4.15, z=2.15..3.15)
+  wallX(I,3.0,4.15,2.15,INT_T,iBot,iTop,MAT.intWall);
+  wallZ(I,2.15,3.15,4.15,INT_T,iBot,iTop,MAT.intWall,[
+    {a:2.23,b:3.03,bot:iBot,top:doorTop},          // B2 D-4 (faces B3 D-4 across pocket, opens E into B2)
   ]);
-  // B2+B1 south wall at z=3.25 (with B1 D-4 at east end)
-  wallX(I,4.15,9.35,3.25,INT_T,iBot,iTop,MAT.intWall,[
+  // B2+B1 south wall at z=3.15 (with B1 D-4 at east end)
+  wallX(I,4.15,9.35,3.15,INT_T,iBot,iTop,MAT.intWall,[
     {a:8.30,b:9.10,bot:iBot,top:doorTop},          // B1 D-4
   ]);
   // B2 | B1 stepped partition (the 500 segment on the top dim string)
   wallZ(I,0,2.0,5.95,INT_T,iBot,iTop,MAT.intWall);
   wallX(I,5.95,6.45,2.0,INT_T,iBot,iTop,MAT.intWall);
-  wallZ(I,2.0,3.25,6.45,INT_T,iBot,iTop,MAT.intWall);
-  box(I,0.4,iTop-iBot,0.2,MAT.intWall,6.35,(iBot+iTop)/2,3.25); // grid-3 column pier
-  wallZ(I,0,3.25,9.35,INT_T,iBot,iTop,MAT.intWall);    // B1|Living
+  wallZ(I,2.0,3.15,6.45,INT_T,iBot,iTop,MAT.intWall);
+  box(I,0.4,iTop-iBot,0.2,MAT.intWall,6.35,(iBot+iTop)/2,3.15); // grid-3 column pier
+  wallZ(I,0,3.15,9.35,INT_T,iBot,iTop,MAT.intWall);    // B1|Living
   // T&B north wall (z=4.05, x=3.0..5.6) with 2x D-3; kitchen stays open east of 5.6
   wallX(I,3.0,5.6,4.05,INT_T,iBot,iTop,MAT.intWall,[
     {a:3.50,b:4.10,bot:iBot,top:doorTop},          // D-3 T&B-a
@@ -482,12 +487,12 @@ function buildHouse(scene){
     box(g,0.03,0.42,0.025,MAT.dark,x+0.065,yb+1.05,z-0.28);        // vertical black bar handle
     O.add(g);
   })();
-  doorUnit(O,3.80,4.05,true,0.60,2.10,MAT.doorPVC,iBot,0.7);         // D-3 a
-  doorUnit(O,4.80,4.05,true,0.60,2.10,MAT.doorPVC,iBot,0.7);         // D-3 b
-  doorUnit(O,3.0,2.25,false,0.80,2.10,MAT.doorWood,iBot,-0.9);       // D-4 B3 (on x=3.0 wall, opens W)
-  doorUnit(O,3.0,3.50,false,0.80,2.10,MAT.doorWood,iBot,-0.9);       // D-4 B4 (on x=3.0 wall, opens W)
-  doorUnit(O,4.15,2.75,false,0.80,2.10,MAT.doorWood,iBot,0.9);       // D-4 B2 (on x=4.15 wall, opens E)
-  doorUnit(O,8.70,3.25,true,0.80,2.10,MAT.doorWood,iBot,2.4);        // D-4 B1 (on z=3.25 wall)
+  doorUnit(O,3.80,4.05,true,0.60,2.10,MAT.doorPVC,iBot,0.7);                 // D-3 a
+  doorUnit(O,4.80,4.05,true,0.60,2.10,MAT.doorPVC,iBot,0.7);                 // D-3 b
+  doorUnit(O,3.0,2.63,false,0.80,2.10,MAT.doorWood,iBot,-0.85,true);         // D-4 B3 (on x=3.0 wall, hinged S at z=3.03, swings W into B3)
+  doorUnit(O,3.0,3.60,false,0.80,2.10,MAT.doorWood,iBot,-0.85,false);        // D-4 B4 (on x=3.0 wall, hinged N at z=3.20, swings W into B4)
+  doorUnit(O,4.15,2.63,false,0.80,2.10,MAT.doorWood,iBot,0.85,true);         // D-4 B2 (on x=4.15 wall, hinged S at z=3.03, swings E into B2)
+  doorUnit(O,8.70,3.15,true,0.80,2.10,MAT.doorWood,iBot,-0.85,true);         // D-4 B1 (on z=3.15 wall, hinged E at x=9.10, swings N into B1)
 
   /* ================= CEILING ================= */
   const C=L.ceiling;
