@@ -671,13 +671,27 @@ function buildHouse(scene){
   // wardrobes ( clear of the stepped walls + vertical D-4 doors )
   for(const [wx,wz,w,ry] of [[9.1,1.6,0.5,Math.PI/2],[5.7,1.0,0.5,Math.PI/2],[2.5,0.45,0.5,0],[2.5,5.55,0.5,0]])
     box(Fu,0.6,1.9,w,MAT.cabOak,wx,FFL+0.95,wz,ry);
-  // living: sofa along west + TV on north
-  box(Fu,0.9,0.42,2.0,MAT.fabric,9.95,FFL+0.21,1.6);
-  box(Fu,0.28,0.8,2.0,MAT.fabric,9.65,FFL+0.4,1.6);
-  box(Fu,0.9,0.42,0.9,MAT.fabric,10.85,FFL+0.21,0.85);
-  box(Fu,0.5,0.35,1.1,MAT.wood,11.4,FFL+0.18,1.5);              // coffee table
-  box(Fu,1.4,0.4,0.35,MAT.cabOak,11.6,FFL+0.2,0.25);            // TV console
-  box(Fu,1.1,0.62,0.05,MAT.dark,11.6,FFL+0.85,0.12);            // TV
+  // living area: TV console + wall-mounted TV on north wall (x=11.65, z=0.25),
+  // large 3-seater couch directly in front of the TV (x=11.65, z=2.25, facing north toward TV),
+  // coffee table & area rug centered between couch and TV, plus accent armchair on west side
+  floorSlab(Fu,10.0,0.65,13.1,2.55,FFL+0.015,0.015,new THREE.MeshStandardMaterial({color:0xd8d2c7,roughness:.92})); // area rug
+  // Large 3-seater couch facing the TV (centered at x=11.65, z=2.25, facing north -Z)
+  box(Fu,2.20,0.40,0.85,MAT.fabric,11.65,FFL+0.20,2.22);          // couch seat base + cushions
+  box(Fu,2.20,0.82,0.22,MAT.fabric,11.65,FFL+0.41,2.58);          // couch backrest (on south side, facing north TV)
+  box(Fu,0.18,0.60,0.85,MAT.fabric,10.64,FFL+0.30,2.22);          // left armrest
+  box(Fu,0.18,0.60,0.85,MAT.fabric,12.66,FFL+0.30,2.22);          // right armrest
+  // Single accent armchair on west side facing east toward coffee table (per A-02 plan)
+  box(Fu,0.80,0.40,0.82,MAT.fabric,9.95,FFL+0.20,1.30);           // armchair seat
+  box(Fu,0.20,0.78,0.82,MAT.fabric,9.62,FFL+0.39,1.30);           // armchair backrest
+  box(Fu,0.80,0.56,0.14,MAT.fabric,9.95,FFL+0.28,0.94);           // armchair N arm
+  box(Fu,0.80,0.56,0.14,MAT.fabric,9.95,FFL+0.28,1.66);           // armchair S arm
+  // Corner side table next to couch/armchair
+  box(Fu,0.48,0.48,0.48,MAT.wood,9.95,FFL+0.24,2.25);
+  // Coffee table centered between the large couch and TV
+  box(Fu,1.25,0.36,0.62,MAT.wood,11.65,FFL+0.18,1.28);            // coffee table
+  // TV console + TV centered at x=11.65 on north wall directly opposite the large couch
+  box(Fu,1.65,0.42,0.38,MAT.cabOak,11.65,FFL+0.21,0.26);          // TV console
+  box(Fu,1.30,0.72,0.05,MAT.dark,11.65,FFL+0.92,0.12);            // TV screen
   // dining table + 6 chairs
   box(Fu,1.8,0.06,0.95,MAT.wood,11.5,FFL+0.72,4.6);
   for(const [tx,tz] of [[10.85,4.25],[12.15,4.25],[10.85,4.95],[12.15,4.95]])

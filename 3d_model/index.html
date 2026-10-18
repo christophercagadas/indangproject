@@ -8,8 +8,18 @@
   html,body{margin:0;height:100%;overflow:hidden;font-family:Segoe UI,Arial,sans-serif;background:#1a1d22}
   #scene{position:fixed;inset:0}
   #panel{position:fixed;top:0;left:0;width:230px;max-height:100%;overflow-y:auto;background:rgba(20,22,26,.92);
-         color:#dfe3ea;padding:14px;border-right:1px solid #333;box-sizing:border-box;user-select:none}
-  #panel h1{font-size:14px;margin:0 0 2px;color:#fff}
+         color:#dfe3ea;padding:14px;border-right:1px solid #333;box-sizing:border-box;user-select:none;
+         z-index:10;transition:transform .22s ease}
+  #panel.collapsed{transform:translateX(-100%)}
+  .panel-hdr{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:2px}
+  #panel h1{font-size:14px;margin:0;color:#fff}
+  #hideMenuBtn{background:#2a2f38;border:1px solid #3a4150;color:#dfe3ea;border-radius:5px;
+               padding:3px 8px;font-size:11px;cursor:pointer;line-height:1.2}
+  #hideMenuBtn:hover{background:#343b47}
+  #showMenuBtn{position:fixed;top:10px;left:10px;z-index:9;background:rgba(20,22,26,.92);
+               border:1px solid #4a8cc8;color:#fff;border-radius:6px;padding:7px 11px;
+               font-size:12px;font-weight:600;cursor:pointer;display:none;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+  #panel.collapsed ~ #showMenuBtn{display:block}
   #panel .sub{font-size:11px;color:#8b95a3;margin-bottom:12px}
   .grp{margin-bottom:12px}
   .grp .t{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#7d8896;margin-bottom:5px}
@@ -20,18 +30,25 @@
   label.ck{display:flex;align-items:center;gap:7px;font-size:12px;padding:3px 2px;cursor:pointer}
   label.ck input{accent-color:#4a8cc8}
   #hint{position:fixed;bottom:10px;left:250px;color:#aab3bf;font-size:11px;background:rgba(20,22,26,.7);
-        padding:6px 10px;border-radius:5px}
+        padding:6px 10px;border-radius:5px;transition:left .22s ease}
+  #panel.collapsed ~ #hint{left:12px}
   #info{position:fixed;top:10px;right:10px;width:270px;background:rgba(20,22,26,.9);color:#cfd6df;
         font-size:11px;padding:10px 12px;border-radius:6px;border:1px solid #333;display:none;line-height:1.5}
   #info b{color:#fff}
-  @media (max-width:720px){#panel{width:190px}}
+  @media (max-width:720px){
+    #panel{width:205px}
+    #hint{left:12px;right:12px;bottom:8px;font-size:10px;text-align:center}
+  }
 </style>
 </head>
 <body>
 <div id="scene"></div>
 
 <div id="panel">
-  <h1>Indang Residence</h1>
+  <div class="panel-hdr">
+    <h1>Indang Residence</h1>
+    <button id="hideMenuBtn" title="Hide menu">✕ Hide</button>
+  </div>
   <div class="sub">One-storey house · 97.06 sqm · from plan set A-01–A-04 / S-01–S-02</div>
 
   <div class="grp">
@@ -79,6 +96,7 @@
   </div>
 </div>
 
+<button id="showMenuBtn" title="Show controls menu">☰ Menu</button>
 <div id="hint">Left-drag orbit · wheel zoom · right-drag pan</div>
 <div id="info"></div>
 
@@ -192,6 +210,10 @@ function walkStep(dt){
 }
 
 // ---------- URL param: ?view=xxx&cam=xxx ----------
+const panelEl=document.getElementById('panel');
+document.getElementById('hideMenuBtn').onclick=()=>panelEl.classList.add('collapsed');
+document.getElementById('showMenuBtn').onclick=()=>panelEl.classList.remove('collapsed');
+
 const qp=new URLSearchParams(location.search);
 if(qp.get('cam')){ const b=document.querySelector(`.btn[data-cam="${qp.get('cam')}"]`); if(b)b.onclick(); }
 if(qp.get('view')){ const b=document.querySelector(`.btn[data-view="${qp.get('view')}"]`); if(b)b.onclick(); }
