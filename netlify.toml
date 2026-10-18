@@ -1,0 +1,3 @@
+[build]
+  publish = "3d_model"
+  command = ""
